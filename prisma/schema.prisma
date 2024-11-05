@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  username     String  @unique
+  email        String  @unique
+  password     String
+  refreshToken String?
+
+  blogs     Blog[]
+  documents Document[]
+  medias    Media[]
+  albums    Album[]
+
+  @@map("admins")
+}
+
+model Blog {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title   String
+  slug    String  @unique
+  content String
+  header  String?
+
+  authorId Int
+  author   Admin @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("blogs")
+}
+
+model Document {
+  id         Int      @id @default(autoincrement())
+  uploadedAt DateTime @default(now()) @updatedAt
+
+  name     String
+  slug     String @unique
+  category String
+  url      String
+  size     String
+
+  uploaderId Int
+  uploader   Admin @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+model Album {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name   String
+  slug   String  @unique
+  header String?
+  size   String?
+
+  creatorId Int
+  creator   Admin @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  medias Media[]
+
+  @@map("albums")
+}
+
+model Media {
+  id         Int      @id @default(autoincrement())
+  uploadedAt DateTime @default(now()) @updatedAt
+
+  name String
+  slug String @unique
+  url  String
+  size String
+
+  albumId Int
+  album   Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  uploaderId Int
+  uploader   Admin @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@map("medias")
+}
+
+model Business {
+  id        Int      @id @default(autoincrement())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  title         String
+  slug          String @unique
+  description   String
+  header        Json?
+  productHeader Json?
+
+  Product Product[]
+  Project Project[]
+
+  @@map("business")
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  title       String
+  slug        String @unique
+  description String
+  media       Json[]
+
+  businessId Int
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("products")
+}
+
+model Project {
+  id        Int      @id @default(autoincrement())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  title       String
+  slug        String @unique
+  description String
+  header      Json?
+  media       Json[]
+
+  businessId Int
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("projects")
+}
+
+model ContactUs {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fullName    String?
+  email       String
+  phoneNumber String?
+  message     String
+
+  @@map("contactUs")
+}
+
+model SuccessJob {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  jobId     String
+  name      String
+  data      Json
+
+  @@map("successJobs")
+}
+
+model FailedJob {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  jobId     String
+  name      String
+  error     String
+  data      Json
+
+  @@map("failedJobs")
+}
